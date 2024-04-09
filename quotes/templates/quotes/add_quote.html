@@ -1,0 +1,28 @@
+{% extends 'quotes/base.html' %}
+{% block content %}
+  <h2 class="add-quote-heading">Add Quote</h2>
+  <form class="add-quote-form" method="post" action="{% url 'quotes:add_quote' %}">
+    {% csrf_token %}
+    <div class="form-group">
+      <label class="quote-label" for="{{ form.quote.id_for_label }}">Quote:</label>
+      <input type="text" class="form-control" name="{{ form.quote.name }}" id="{{ form.quote.id_for_label }}" value="{{ form.quote.value|default_if_none:'' }}">
+    </div>
+    <div class="form-group">
+      <label class="author-label" for="{{ form.author.id_for_label }}">Author:</label>
+      <select class="form-control author-select" name="{{ form.author.name }}" id="{{ form.author.id_for_label }}">
+        {% for author in form.author.field.queryset %}
+          <option value="{{ author.pk }}">{{ author.fullname }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="tags-label" for="{{ form.tags.id_for_label }}">Tags:</label>
+      <select class="form-control tags-select" name="{{ form.tags.name }}" id="{{ form.tags.id_for_label }}" multiple>
+        {% for tag in form.tags.field.queryset %}
+          <option value="{{ tag.pk }}">{{ tag.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn btn-primary submit-button" type="submit">Add Quote</button>
+  </form>
+{% endblock %}
