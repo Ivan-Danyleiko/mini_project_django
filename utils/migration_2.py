@@ -1,6 +1,8 @@
 import os
 import django
-from dateutil import parser
+from django.utils.dateparse import parse_date
+from datetime import datetime
+from bson import ObjectId
 
 from pymongo import MongoClient
 
@@ -11,45 +13,39 @@ from quotes.models import Quote, Tag, Author  # noqa
 
 client = MongoClient("mongodb://localhost")
 db = client.hw_10
+
 authors = db.authors.find()
 
-for author_data in authors:
-    born_date_str = author_data.get("born_date", "")
-    if born_date_str:
-        born_date = parser.parse(born_date_str).strftime('%Y-%m-%d')
-        author = Author.objects.filter(fullname=author_data['fullname']).first()
-        if not author:
-            author = Author.objects.create(
-                fullname=author_data['fullname'],
+for author in authors:
+    author_id = str(author['_id'])
+    if not Author.objects.filter(id=author_id).exists():
+        born_date_str = author.get("born_date", "")
+        if born_date_str:
+            born_date = parse_date(datetime.strptime(born_date_str, "%B %d, %Y").strftime('%Y-%m-%d'))
+        else:
+            born_date = None
+        fullname = author.get("fullname", "")
+        if fullname:
+            a, created = Author.objects.get_or_create(
+                id=author_id,
+                fullname=fullname,
                 born_date=born_date,
-                born_location=author_data['born_location'],
-                description=author_data['description'],
+                born_location=author.get("born_location", ""),
+                description=author.get("description", ""),
             )
 
 quotes = db.quotes.find()
 
-for quote_data in quotes:
-    tags = []
-    for tag in quote_data['tags']:
-        t, *_ = Tag.objects.get_or_create(name=tag)
-        tags.append(t)
-
-    exit_quote = bool(len(Quote.objects.filter(quote=quote_data["quote"])))
-
-    if not exit_quote:
-        author = db.authors.find_one({'_id': quote_data['author']})
-        a = Author.objects.filter(fullname=author['fullname']).first()
-        if not a:
-            born_date = parser.parse(author.get('born_date', '')).strftime('%Y-%m-%d')
-            a = Author.objects.create(
-                fullname=author['fullname'],
-                born_date=born_date,
-                born_location=author['born_location'],
-                description=author['description'],
-            )
+for quote in quotes:
+    author_id = str(quote['author'])
+    if not Author.objects.filter(id=author_id).exists():
+        author = Author.objects.get(id=author_id)
+        tags = []
+        for tag_name in quote['tags']:
+            tag, _ = Tag.objects.get_or_create(name=tag_name)
+            tags.append(tag)
         q = Quote.objects.create(
-            quote=quote_data["quote"],
-            author=a,
+            quote=quote["quote"],
+            author=author
         )
-        for tag in tags:
-            q.tags.add(tag)
+        q.tags.add(*tags)

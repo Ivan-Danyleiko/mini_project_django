@@ -1,9 +1,8 @@
 from django.db import models
 
 
-# Create your models here.
-
 class Author(models.Model):
+    id = models.AutoField(primary_key=True)
     fullname = models.CharField(max_length=50)
     born_date = models.DateField(null=True)
     born_location = models.CharField(max_length=150)
@@ -22,7 +21,7 @@ class Tag(models.Model):
 
 
 class Quote(models.Model):
-    objects = None
+    id = models.AutoField(primary_key=True)
     quote = models.TextField()
     tags = models.ManyToManyField(Tag)
     author = models.ForeignKey(Author, on_delete=models.CASCADE, default=None, null=True)
