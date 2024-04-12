@@ -19,5 +19,5 @@ for quote in quotes:
     db.quotes.insert_one({
         'quote': quote['quote'],
         'tags': quote['tags'],
-        'author': ObjectId(author_id),
+        'author': quote['author'],
     })
