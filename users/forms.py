@@ -7,7 +7,9 @@ class RegisterForm(UserCreationForm):
     username = forms.CharField(max_length=100,
                                required=True,
                                widget=forms.TextInput())
-
+    email = forms.CharField(max_length=100,
+                                required=True,
+                                widget=forms.TextInput())
     password1 = forms.CharField(max_length=50,
                                 required=True,
                                 widget=forms.PasswordInput())
