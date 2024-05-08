@@ -8,8 +8,9 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 django = "^5.0.4"
-pymongo = "^4.6.3"
 psycopg2 = "^2.9.9"
+django-environ = "^0.11.2"
+pymongo = "^4.7.2"
 
 
 [build-system]
